@@ -1,2 +1,2 @@
-# SQL-Date-Table
-Code for generating date table in T-SQL
+# Date-Table
+Repo for generating date table in various languages
