@@ -1,7 +1,7 @@
-USE SampleDB
+USE [ContosoRetailDW] -- Change with your Database
 GO
 
-CREATE OR ALTER PROCEDURE usp_GenerateDates
+CREATE OR ALTER PROCEDURE [dbo].[usp_GenerateDateTable]
 	@StartDate		DATE,
 	@EndDate		DATE,
 	@FiscalMonth	TINYINT = NULL,
@@ -24,63 +24,84 @@ BEGIN
 	DECLARE @CurrentMonth AS INTEGER = MONTH(@CurrentDate)
 	DECLARE @CurrentQuarter AS INTEGER = DATEPART(QUARTER, @CurrentDate)
 	
-	;WITH DateSetup AS(
+	;WITH YearMonthDay AS(
 		SELECT  [Date]
 			,[Month Number] = MONTH([Date])
-			,[Month] = DATENAME(MONTH, [Date])
-			,[Month Short] = LEFT(DATENAME(MONTH,[Date]),3)
-			
 			,[Quarter Number] = DATENAME(QUARTER, [Date])
-			,[Quarter] = 'Q'+DATENAME(QUARTER, [Date])
-
-			,[Year Quarter Number] = YEAR([Date]) * 10 + DATEPART(QUARTER, [Date])
-			,[Year Quarter] = 'Q' + CONVERT(VARCHAR,DATEPART(QUARTER, [Date])) + ' ' + CONVERT(VARCHAR,YEAR([Date]))
 			,[Year Number] = YEAR([Date])
 		FROM #Dates
 	)
 
-	,StartAndEndDate AS (
+	,DayColumns AS (
 		SELECT *
-			,[Month Start Date] = CONVERT(DATE,DATEADD(MONTH,DATEDIFF(MONTH, 0,[Date]),0))
+			,[Day of Week Number] = DATEPART(DAY, [Date])
+			,[Day of Week Name] = DATENAME(WEEKDAY, [Date])
+			,[Day of Week Intial] = LEFT(DATENAME(WEEKDAY, [Date]), 3)
+			,[Day of Year] = DATEPART(DAYOFYEAR, [Date])
+			,[Current Day Offset] = CONVERT(INT,CONVERT(DATETIME,[Date])) - CONVERT(INT,CONVERT(DATETIME, @CurrentDate))
+			,[Is After Today] = IIF([Date] <= @CurrentDate, 'False', 'True')
+			,[Is Working Day] = IIF(DATEPART(WEEKDAY, [Date]) IN (2, 3, 4, 5, 6), 'True', 'False')
+			,[Day Type] = IIF(DATEPART(WEEKDAY, [Date]) IN (2, 3, 4, 5, 6), 'Working', 'Weekend')
+		FROM YearMonthDay
+	)
+
+	,MonthColumns AS (
+		SELECT *
+			,[Month] = DATENAME(MONTH, [Date])
+			,[Month Short] = LEFT(DATENAME(MONTH,[Date]),3)
+			,[Month Stort Date] = CONVERT(DATE,DATEADD(MONTH,DATEDIFF(MONTH, 0,[Date]),0))
 			,[Month End Date] = CONVERT(DATE,DATEADD(MONTH,DATEDIFF(MONTH, 0, [Date])+1,-1))
+
+			-- Can be Subquery instead but costs readability
+			,[Month Completed] = 
+				CASE 
+					WHEN CONVERT(DATE,DATEADD(MONTH,DATEDIFF(MONTH, 0, [Date])+1,-1)) -- Start Date
+							< CONVERT(DATE,DATEADD(MONTH,DATEDIFF(MONTH, 0, @CurrentDate)+1,-1)) -- End Date
+					THEN 'True' 
+					ELSE 'False' 
+				END
+		FROM DayColumns
+	)
+
+	,QuarterColumns AS (
+		SELECT * 
 			,[Quarter Start Date] = CONVERT(DATE, DATEADD(QUARTER,DATEDIFF(QUARTER, 0, [Date]), 0))
 			,[Quarter End Date] = CONVERT(DATE, DATEADD(QUARTER,DATEDIFF(QUARTER, 0, [Date]) + 1, -1))
+			,[Quarter] = 'Q'+DATENAME(QUARTER, [Date])
+			,[Quarter Offset Negative] = ( (4 * [Year Number]) + [Quarter Number] ) - ( ( 4 * @CurrentYear ) + @CurrentQuarter )
+			,[Quarter Completed] = 
+				CASE 
+					WHEN CONVERT(DATE, DATEADD(QUARTER,DATEDIFF(QUARTER, 0, [Date]) + 1, -1)) 
+							< CONVERT(DATE,DATEADD(QUARTER,DATEDIFF(QUARTER, 0, @CurrentDate)+1,-1))
+					THEN 'True' 
+					ELSE 'False' 
+				END
+		FROM MonthColumns
+	)
+
+	,YearColumns AS (
+		SELECT *
 			,[Year Start Date] = DATEFROMPARTS(YEAR([Date]), 1, 1 )
 			,[Year End Date] = DATEFROMPARTS(YEAR([Date]), 12, 31)
-		FROM DateSetup
-	)
-
-	,Offset AS (
-		SELECT *
 			,[Year Offset Negative] = [Year Number] - @CurrentYear
 			,[Year Month Offset Sequential] = ( [Year Number] * 12 ) - 1 + [Month Number]
-			,[Quarter Offset Negative] = ( (4 * [Year Number]) + [Quarter Number] ) - ( ( 4 * @CurrentYear ) + @CurrentQuarter )
 			,[Year Quarter Offset Sequential] =  ( [Year Number] * 4 ) - 1 + [Quarter Number]
-		FROM StartAndEndDate
+			,[Year Quarter Number] = YEAR([Date]) * 10 + DATEPART(QUARTER, [Date])
+			,[Year Quarter] = 'Q' + CONVERT(VARCHAR,DATEPART(QUARTER, [Date])) + ' ' + CONVERT(VARCHAR,YEAR([Date]))
+			,[Year Completed] = 
+				CASE 
+					WHEN DATEFROMPARTS(YEAR([Date]), 12, 31) 
+							< DATEFROMPARTS(@CurrentYear, 12, 31) 
+					THEN 'True' 
+					ELSE 'False' 
+				END
+		FROM QuarterColumns
 	)
 
-	,PeriodComplete AS (
-		SELECT *
-			,[Year Completed] = 
-				CASE WHEN [Year End Date] < DATEFROMPARTS(@CurrentYear, 12, 31) 
-					THEN 'True' 
-					ELSE 'False' 
-				END
-			,[Month Completed] = 
-				CASE WHEN [Month End Date] < CONVERT(DATE,DATEADD(MONTH,DATEDIFF(MONTH, 0, @CurrentDate)+1,-1))
-					THEN 'True' 
-					ELSE 'False' 
-				END
-			,[Quarter Completed] = 
-				CASE WHEN [Month End Date] < CONVERT(DATE,DATEADD(QUARTER,DATEDIFF(QUARTER, 0, @CurrentDate)+1,-1))
-					THEN 'True' 
-					ELSE 'False' 
-				END
-		FROM Offset
-	)
+
 	SELECT *
 	INTO #Date2
-	FROM PeriodComplete
+	FROM YearColumns
 
 	IF @FiscalMonth IS NULL
 		SELECT * 
@@ -94,6 +115,7 @@ BEGIN
 				,[Fiscal Month Short] = [Month Short]
 			FROM #Date2
 		END
+
 	DROP TABLE IF EXISTS #Dates
 	DROP TABLE IF EXISTS #Date2
 	SET NOCOUNT OFF
