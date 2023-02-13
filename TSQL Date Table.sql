@@ -113,6 +113,9 @@ BEGIN
 				,[Fiscal Month Number] = IIF([Month Number]<7,[Month Number]-7+12,[Month Number]-7)+1
 				,[Fiscal Month] = [Month]
 				,[Fiscal Month Short] = [Month Short]
+				,[Fiscal Day Number in Year] = CONVERT(INT,CONVERT(DATETIME,[Date]) - DATEFROMPARTS([Year Number] + IIF([Month Number]<@FiscalMonth,1,0) * -1, @FiscalMonth, 1)+1)
+				,[Fiscal Year Month Number] = ([Year Number] + IIF([Month Number] >= 7, 1, 0 )) * 100 + IIF([Month Number]<7,[Month Number]-7+12,[Month Number]-7)+1
+				,[Fiscal Year Month] = CONVERT(VARCHAR,[Year Number] + IIF([Month Number] >= 7, 1, 0 )) + ' ' + [Month Short]
 			FROM #Date2
 		END
 
