@@ -1,21 +1,22 @@
 USE [ContosoRetailDW] -- Change with your Database
 GO
 
-CREATE OR ALTER PROCEDURE [dbo].[usp_GenerateDateTable]
+
+ALTER   PROCEDURE [dbo].[usp_GenerateDateTable]
 	@StartDate		DATE,
 	@EndDate		DATE,
-	@FiscalMonth	TINYINT = NULL,
+	@FiscalMonth		TINYINT = NULL,
 	@FiscalDate		TINYINT = NULL
 AS
 BEGIN
 	SET NOCOUNT ON
-	DROP TABLE IF EXISTS #Dates
-	DROP TABLE IF EXISTS #Date2
-	CREATE TABLE #Dates ( Date DATE )
+	DROP TABLE IF EXISTS #____Dates
+	DROP TABLE IF EXISTS #____Date2
+	CREATE TABLE #____Dates ( Date DATE )
 
 	WHILE @StartDate <= @EndDate
 		BEGIN
-			INSERT INTO #Dates VALUES (@StartDate)
+			INSERT INTO #____Dates VALUES (@StartDate)
 			SET @StartDate = DATEADD(DAY,1,@StartDate)
 		END
 		 
@@ -29,7 +30,7 @@ BEGIN
 			,[Month Number] = MONTH([Date])
 			,[Quarter Number] = DATENAME(QUARTER, [Date])
 			,[Year Number] = YEAR([Date])
-		FROM #Dates
+		FROM #____Dates
 	)
 
 	,DayColumns AS (
@@ -100,12 +101,12 @@ BEGIN
 
 
 	SELECT *
-	INTO #Date2
+	INTO #____Date2
 	FROM YearColumns
 
 	IF @FiscalMonth IS NULL
 		SELECT * 
-		FROM #Date2
+		FROM #____Date2
 	ELSE
 		BEGIN
 			SELECT *
@@ -120,10 +121,10 @@ BEGIN
 					([Year Number] + IIF([Month Number] >= @FiscalMonth, 1, 0 )) * 100 
 						+ IIF([Month Number]<@FiscalMonth,[Month Number]-@FiscalMonth+12,[Month Number]-@FiscalMonth)+1
 				,[Fiscal Year Month] = CONVERT(VARCHAR,[Year Number] + IIF([Month Number] >= @FiscalMonth, 1, 0 )) + ' ' + [Month Short]
-			FROM #Date2
+			FROM #____Date2
 		END
 
-	DROP TABLE IF EXISTS #Dates
-	DROP TABLE IF EXISTS #Date2
+	DROP TABLE IF EXISTS #____Dates
+	DROP TABLE IF EXISTS #____Date2
 	SET NOCOUNT OFF
 END
