@@ -162,18 +162,205 @@ let
                     AmPm = text
                 ]
         ),
-    ExpandedNewCols = Table.ExpandTableColumn(NewCols, "NewCols", {"Hour24", "Hour12", "Hour 12 Text", "Second", "Minute", "TimeKey", "AmPm"}, {"Hour24", "Hour12", "Hour 12 Text", "Second", "Minute", "TimeKey", "AmPm"}),
-    AddedPeriodOfDay = Table.AddColumn ( ExpandedNewCols, "PeriodOfDay", (OuterHour)=> Table.SelectRows ( PeriodOfDay, (InnerHour)=> OuterHour[Hour24] >= InnerHour[Hour Min] and OuterHour[Hour24] <= InnerHour[Hour Max] ), type table [Period of Day Name = text, Period of Day Name Sort = Int64.Type] ),
-    ExpandedPeriodOfDayName = Table.ExpandTableColumn(AddedPeriodOfDay, "PeriodOfDay", {"Period of Day Name", "Period of Day Name Sort"}, {"Period of Day Name", "Period of Day Name Sort"}),
-    AddedTwelveHourPeriod = Table.AddColumn ( ExpandedPeriodOfDayName, "TwelveHourPeriod", (OuterHour)=> Table.SelectRows ( TwelveHourPeriod, (InnerHour)=> OuterHour[Hour24] >= InnerHour[Hour Min] and OuterHour[Hour24] <= InnerHour[Hour Max] ), type table [Hour Min = Int64.Type, Hour Max = Int64.Type, #"12 Hour Period Name" = text, #"12 Hour Bin" = text, #"12 Hour Bin Sort" = Int64.Type] ),
-    ExpandedTwelverHourPeriod = Table.ExpandTableColumn(AddedTwelveHourPeriod, "TwelveHourPeriod", {"12 Hour Period Name", "12 Hour Bin", "12 Hour Bin Sort"}, {"12 Hour Period Name", "12 Hour Bin", "12 Hour Bin Sort"}),
-    AddedSixHourPeriod = Table.AddColumn ( ExpandedTwelverHourPeriod, "SixHourPeriod", (OuterHour)=> Table.SelectRows ( SixHourPeriod, (InnerHour)=> OuterHour[Hour24] >= InnerHour[Hour Min] and OuterHour[Hour24] <= InnerHour[Hour Max] ), type table [Hour Min = Int64.Type, Hour Max = Int64.Type, #"6 Hour Period Name" = text, #"6 Hour Bin" = text, #"6 Hour Bin Sort" = Int64.Type] ),
-    ExpandedSixHourPeriod = Table.ExpandTableColumn(AddedSixHourPeriod, "SixHourPeriod", {"6 Hour Period Name", "6 Hour Bin", "6 Hour Bin Sort"}, {"6 Hour Period Name", "6 Hour Bin", "6 Hour Bin Sort"}),
-    AddedFourHourPeriod = Table.AddColumn ( ExpandedSixHourPeriod, "FourHourPeriod", (OuterHour)=> Table.SelectRows ( FourHourPeriod, (InnerHour)=> OuterHour[Hour24] >= InnerHour[Hour Min] and OuterHour[Hour24] <= InnerHour[Hour Max] ), type table [Hour Min = Int64.Type, Hour Max = Int64.Type, #"4 Hour Period Name" = text, #"4 Hour Bin" = text, #"4 Hour Bin Sort" = Int64.Type] ),
-    ExpandedFourHourPeriod = Table.ExpandTableColumn(AddedFourHourPeriod, "FourHourPeriod", {"4 Hour Period Name", "4 Hour Bin", "4 Hour Bin Sort"}, {"4 Hour Period Name", "4 Hour Bin", "4 Hour Bin Sort"}),
-    AddedTwoHourPeriod = Table.AddColumn ( ExpandedFourHourPeriod, "TwoHourPeriod", (OuterHour)=> Table.SelectRows ( TwoHourPeriod, (InnerHour)=> OuterHour[Hour24] >= InnerHour[Hour Min] and OuterHour[Hour24] <= InnerHour[Hour Max] ), type table [Hour Min = Int64.Type, Hour Max = Int64.Type, #"2 Hour Period Name" = text, #"2 Hour Bin" = text, #"2 Hour Bin Sort" = Int64.Type] ),
-    ExpandedTwoHourPeriod = Table.ExpandTableColumn(AddedTwoHourPeriod, "TwoHourPeriod", {"2 Hour Period Name", "2 Hour Bin", "2 Hour Bin Sort"}, {"2 Hour Period Name", "2 Hour Bin", "2 Hour Bin Sort"}),
-    AdddedThirtyMinutePeriod = Table.AddColumn ( ExpandedTwoHourPeriod, "ThrityMinutePeriod", (OuterMinute)=> Table.SelectRows ( ThirtyMinutePeriod, (InnerMinute)=> OuterMinute[Minute] >= InnerMinute[Minute Min] and OuterMinute[Minute] <= InnerMinute[Minute Max] ), type table [Minute Min = Int64.Type, Minute Max = Int64.Type, #"30 Minute Period Name" = text, #"30 Minute Bin" = text, #"30 Minute Bin Sort" = Int64.Type] ),
-    ExpandedThrityMinutePeriod = Table.ExpandTableColumn(AdddedThirtyMinutePeriod, "ThrityMinutePeriod", {"30 Minute Period Name", "30 Minute Bin", "30 Minute Bin Sort"}, {"30 Minute Period Name", "30 Minute Bin", "30 Minute Bin Sort"})
+    ExpandedNewCols = Table.ExpandTableColumn (
+        NewCols, 
+        "NewCols", 
+        { "Hour24", "Hour12", "Hour 12 Text", "Second", "Minute", "TimeKey", "AmPm" }, 
+        { "Hour24", "Hour12", "Hour 12 Text", "Second", "Minute", "TimeKey", "AmPm" }
+    ), 
+    AddedPeriodOfDay = Table.AddColumn (
+        ExpandedNewCols, 
+        "PeriodOfDay", 
+        ( OuterHour ) =>
+            Table.SelectRows (
+                PeriodOfDay, 
+                ( InnerHour ) =>
+                    OuterHour[Hour24]
+                        >= InnerHour[Hour Min] and OuterHour[Hour24]
+                        <= InnerHour[Hour Max]
+            ), 
+        type table [ Period of Day Name = text, Period of Day Name Sort = Int64.Type ]
+    ), 
+    ExpandedPeriodOfDayName = Table.ExpandTableColumn (
+        AddedPeriodOfDay, 
+        "PeriodOfDay", 
+        { "Period of Day Name", "Period of Day Name Sort" }, 
+        { "Period of Day Name", "Period of Day Name Sort" }
+    ), 
+    AddedTwelveHourPeriod = Table.AddColumn (
+        ExpandedPeriodOfDayName, 
+        "TwelveHourPeriod", 
+        ( OuterHour ) =>
+            Table.SelectRows (
+                TwelveHourPeriod, 
+                ( InnerHour ) =>
+                    OuterHour[Hour24]
+                        >= InnerHour[Hour Min] and OuterHour[Hour24]
+                        <= InnerHour[Hour Max]
+            ), 
+        type table [
+            Hour Min = Int64.Type, 
+            Hour Max = Int64.Type, 
+            #"12 Hour Period Name" = text, 
+            #"12 Hour Bin" = text, 
+            #"12 Hour Bin Sort" = Int64.Type
+        ]
+    ), 
+    ExpandedTwelverHourPeriod = Table.ExpandTableColumn (
+        AddedTwelveHourPeriod, 
+        "TwelveHourPeriod", 
+        { "12 Hour Period Name", "12 Hour Bin", "12 Hour Bin Sort" }, 
+        { "12 Hour Period Name", "12 Hour Bin", "12 Hour Bin Sort" }
+    ), 
+    AddedSixHourPeriod = Table.AddColumn (
+        ExpandedTwelverHourPeriod, 
+        "SixHourPeriod", 
+        ( OuterHour ) =>
+            Table.SelectRows (
+                SixHourPeriod, 
+                ( InnerHour ) =>
+                    OuterHour[Hour24]
+                        >= InnerHour[Hour Min] and OuterHour[Hour24]
+                        <= InnerHour[Hour Max]
+            ), 
+        type table [
+            Hour Min = Int64.Type, 
+            Hour Max = Int64.Type, 
+            #"6 Hour Period Name" = text, 
+            #"6 Hour Bin" = text, 
+            #"6 Hour Bin Sort" = Int64.Type
+        ]
+    ), 
+    ExpandedSixHourPeriod = Table.ExpandTableColumn (
+        AddedSixHourPeriod, 
+        "SixHourPeriod", 
+        { "6 Hour Period Name", "6 Hour Bin", "6 Hour Bin Sort" }, 
+        { "6 Hour Period Name", "6 Hour Bin", "6 Hour Bin Sort" }
+    ), 
+    AddedFourHourPeriod = Table.AddColumn (
+        ExpandedSixHourPeriod, 
+        "FourHourPeriod", 
+        ( OuterHour ) =>
+            Table.SelectRows (
+                FourHourPeriod, 
+                ( InnerHour ) =>
+                    OuterHour[Hour24]
+                        >= InnerHour[Hour Min] and OuterHour[Hour24]
+                        <= InnerHour[Hour Max]
+            ), 
+        type table [
+            Hour Min = Int64.Type, 
+            Hour Max = Int64.Type, 
+            #"4 Hour Period Name" = text, 
+            #"4 Hour Bin" = text, 
+            #"4 Hour Bin Sort" = Int64.Type
+        ]
+    ), 
+    ExpandedFourHourPeriod = Table.ExpandTableColumn (
+        AddedFourHourPeriod, 
+        "FourHourPeriod", 
+        { "4 Hour Period Name", "4 Hour Bin", "4 Hour Bin Sort" }, 
+        { "4 Hour Period Name", "4 Hour Bin", "4 Hour Bin Sort" }
+    ), 
+    AddedTwoHourPeriod = Table.AddColumn (
+        ExpandedFourHourPeriod, 
+        "TwoHourPeriod", 
+        ( OuterHour ) =>
+            Table.SelectRows (
+                TwoHourPeriod, 
+                ( InnerHour ) =>
+                    OuterHour[Hour24]
+                        >= InnerHour[Hour Min] and OuterHour[Hour24]
+                        <= InnerHour[Hour Max]
+            ), 
+        type table [
+            Hour Min = Int64.Type, 
+            Hour Max = Int64.Type, 
+            #"2 Hour Period Name" = text, 
+            #"2 Hour Bin" = text, 
+            #"2 Hour Bin Sort" = Int64.Type
+        ]
+    ), 
+    ExpandedTwoHourPeriod = Table.ExpandTableColumn (
+        AddedTwoHourPeriod, 
+        "TwoHourPeriod", 
+        { "2 Hour Period Name", "2 Hour Bin", "2 Hour Bin Sort" }, 
+        { "2 Hour Period Name", "2 Hour Bin", "2 Hour Bin Sort" }
+    ), 
+    AdddedThirtyMinutePeriod = Table.AddColumn (
+        ExpandedTwoHourPeriod, 
+        "ThirtyMinutePeriod", 
+        ( OuterMinute ) =>
+            Table.SelectRows (
+                ThirtyMinutePeriod, 
+                ( InnerMinute ) =>
+                    OuterMinute[Minute]
+                        >= InnerMinute[Minute Min] and OuterMinute[Minute]
+                        <= InnerMinute[Minute Max]
+            ), 
+        type table [
+            Minute Min = Int64.Type, 
+            Minute Max = Int64.Type, 
+            #"30 Minute Period Name" = text, 
+            #"30 Minute Bin" = text, 
+            #"30 Minute Bin Sort" = Int64.Type
+        ]
+    ), 
+    ExpandedThirtyMinutePeriod = Table.ExpandTableColumn (
+        AdddedThirtyMinutePeriod, 
+        "ThirtyMinutePeriod", 
+        { "30 Minute Period Name", "30 Minute Bin", "30 Minute Bin Sort" }, 
+        { "30 Minute Period Name", "30 Minute Bin", "30 Minute Bin Sort" }
+    ), 
+    AddedTenMinutePeriod = Table.AddColumn (
+        ExpandedThirtyMinutePeriod, 
+        "TenMinutePeriod", 
+        ( OuterMinute ) =>
+            Table.SelectRows (
+                TenMinutePeriod, 
+                ( InnerMinute ) =>
+                    OuterMinute[Minute]
+                        >= InnerMinute[Minute Min] and OuterMinute[Minute]
+                        <= InnerMinute[Minute Max]
+            ), 
+        type table [
+            Minute Min = Int64.Type, 
+            Minute Max = Int64.Type, 
+            #"10 Minute Period Name" = text, 
+            #"10 Minute Bin" = text, 
+            #"10 Minute Bin Sort" = Int64.Type
+        ]
+    ), 
+    ExpandedTenMinutePeriod = Table.ExpandTableColumn (
+        AddedTenMinutePeriod, 
+        "TenMinutePeriod", 
+        { "10 Minute Period Name", "10 Minute Bin", "10 Minute Bin Sort" }, 
+        { "10 Minute Period Name", "10 Minute Bin", "10 Minute Bin Sort" }
+    ), 
+    AddedFiveMinutePeriod = Table.AddColumn (
+        ExpandedTenMinutePeriod, 
+        "FiveMinutePeriod", 
+        ( OuterMinute ) =>
+            Table.SelectRows (
+                FiveMinutePeriod, 
+                ( InnerMinute ) =>
+                    OuterMinute[Minute]
+                        >= InnerMinute[Minute Min] and OuterMinute[Minute]
+                        <= InnerMinute[Minute Max]
+            ), 
+        type table [
+            Minute Min = Int64.Type, 
+            Minute Max = Int64.Type, 
+            #"5 Minute Period Name" = text, 
+            #"5 Minute Bin" = text, 
+            #"5 Minute Bin Sort" = Int64.Type
+        ]
+    ), 
+    ExpandedFiveMinutePeriod = Table.ExpandTableColumn (
+        AddedFiveMinutePeriod, 
+        "FiveMinutePeriod", 
+        { "5 Minute Period Name", "5 Minute Bin", "5 Minute Bin Sort" }, 
+        { "5 Minute Period Name", "5 Minute Bin", "5 Minute Bin Sort" }
+    )
 in
-    ExpandedThrityMinutePeriod
+    ExpandedFiveMinutePeriod
