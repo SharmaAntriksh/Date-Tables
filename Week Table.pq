@@ -1,3 +1,13 @@
+/*
+    Original Code written in DAX by SQLBI -> https://www.sqlbi.com/
+    DAX Based week date table -> https://www.daxpatterns.com/week-related-calculations/
+    
+    I have only replicated DAX into PQ and made a little bit of modifications to create a 1:1 relationship between DAX and PQ
+    
+    The below code is a function that you need to copy and past in PQ Editor in PBI or Excel or any other tool
+    You can run it even without specifying the parameters and then later customize them once you understand the table
+*/
+
 (
     optional pFirstFiscalMonth as number, 
     optional pFirstDayOfWeek as number, 
@@ -8,13 +18,13 @@
     optional pWeeklyType as text
 ) =>
 let
-    FirstFiscalMonth = if pFirstFiscalMonth is null then 8 else pFirstFiscalMonth,
-    FirstDayOfWeek = if pFirstDayOfWeek is null then Day.Monday else pFirstDayOfWeek,
-    FirstDate = if pFirstDate is null then #date ( 2018, 03, 18 ) else pFirstDate,
-    LastDate = if pLastDate is null then #date ( 2025, 08, 15 ) else pLastDate,
-    TypeStartFiscalYear = if pTypeStartFiscalYear is null then 1 else pTypeStartFiscalYear,
-    QuarterWeekType = if pQuarterWeekType is null then "445" else pQuarterWeekType, //445, 454, 544
-    WeeklyType = if pWeeklyType is null then "Last" else pWeeklyType, // Last or Nearest
+    FirstFiscalMonth            = if pFirstFiscalMonth is null then 8 else pFirstFiscalMonth,
+    FirstDayOfWeek              = if pFirstDayOfWeek is null then Day.Monday else pFirstDayOfWeek,
+    FirstDate                   = if pFirstDate is null then #date ( 2018, 03, 18 ) else pFirstDate,
+    LastDate                    = if pLastDate is null then #date ( 2025, 08, 15 ) else pLastDate,
+    TypeStartFiscalYear         = if pTypeStartFiscalYear is null then 1 else pTypeStartFiscalYear,
+    QuarterWeekType             = if pQuarterWeekType is null then "445" else pQuarterWeekType, //445, 454, 544
+    WeeklyType                  = if pWeeklyType is null then "Last" else pWeeklyType, // Last or Nearest
     FirstYear = 
         Date.Year ( FirstDate ) + 1 * 
             ( 
