@@ -136,7 +136,15 @@ let
                             + Minute * ( if Second is null then 1 else 100 )
                             + ( if Second is null then 0 else Second  ),
                 AmPm = if Hour24 < 12 then "AM" else "PM",
-                Combine = { Hour24, Hour12, Text.From ( Hour12 ) & " " & AmPm, Second, Minute, TimeKey, AmPm },
+                Combine = { 
+                    Hour24, 
+                    Hour12, 
+                    Text.From ( Hour12 ) & " " & 
+                    AmPm, Second, 
+                    Minute, 
+                    TimeKey, 
+                    AmPm 
+                },
                 Result = 
                     Table.FromRows ( 
                        { Combine },
@@ -175,9 +183,8 @@ let
             Table.SelectRows (
                 PeriodOfDay, 
                 ( InnerHour ) =>
-                    OuterHour[Hour24]
-                        >= InnerHour[Hour Min] and OuterHour[Hour24]
-                        <= InnerHour[Hour Max]
+                    OuterHour[Hour24] >= InnerHour[Hour Min] 
+                        and OuterHour[Hour24] <= InnerHour[Hour Max]
             ), 
         type table [ Period of Day Name = text, Period of Day Name Sort = Int64.Type ]
     ), 
@@ -194,9 +201,8 @@ let
             Table.SelectRows (
                 TwelveHourPeriod, 
                 ( InnerHour ) =>
-                    OuterHour[Hour24]
-                        >= InnerHour[Hour Min] and OuterHour[Hour24]
-                        <= InnerHour[Hour Max]
+                    OuterHour[Hour24] >= InnerHour[Hour Min] 
+                        and OuterHour[Hour24] <= InnerHour[Hour Max]
             ), 
         type table [
             Hour Min = Int64.Type, 
@@ -219,9 +225,8 @@ let
             Table.SelectRows (
                 SixHourPeriod, 
                 ( InnerHour ) =>
-                    OuterHour[Hour24]
-                        >= InnerHour[Hour Min] and OuterHour[Hour24]
-                        <= InnerHour[Hour Max]
+                    OuterHour[Hour24] >= InnerHour[Hour Min] 
+                        and OuterHour[Hour24] <= InnerHour[Hour Max]
             ), 
         type table [
             Hour Min = Int64.Type, 
@@ -244,9 +249,8 @@ let
             Table.SelectRows (
                 FourHourPeriod, 
                 ( InnerHour ) =>
-                    OuterHour[Hour24]
-                        >= InnerHour[Hour Min] and OuterHour[Hour24]
-                        <= InnerHour[Hour Max]
+                    OuterHour[Hour24] >= InnerHour[Hour Min] 
+                        and OuterHour[Hour24] <= InnerHour[Hour Max]
             ), 
         type table [
             Hour Min = Int64.Type, 
@@ -269,9 +273,8 @@ let
             Table.SelectRows (
                 TwoHourPeriod, 
                 ( InnerHour ) =>
-                    OuterHour[Hour24]
-                        >= InnerHour[Hour Min] and OuterHour[Hour24]
-                        <= InnerHour[Hour Max]
+                    OuterHour[Hour24] >= InnerHour[Hour Min] 
+                        and OuterHour[Hour24] <= InnerHour[Hour Max]
             ), 
         type table [
             Hour Min = Int64.Type, 
@@ -294,9 +297,8 @@ let
             Table.SelectRows (
                 ThirtyMinutePeriod, 
                 ( InnerMinute ) =>
-                    OuterMinute[Minute]
-                        >= InnerMinute[Minute Min] and OuterMinute[Minute]
-                        <= InnerMinute[Minute Max]
+                    OuterMinute[Minute] >= InnerMinute[Minute Min] 
+                        and OuterMinute[Minute] <= InnerMinute[Minute Max]
             ), 
         type table [
             Minute Min = Int64.Type, 
@@ -319,9 +321,8 @@ let
             Table.SelectRows (
                 TenMinutePeriod, 
                 ( InnerMinute ) =>
-                    OuterMinute[Minute]
-                        >= InnerMinute[Minute Min] and OuterMinute[Minute]
-                        <= InnerMinute[Minute Max]
+                    OuterMinute[Minute] >= InnerMinute[Minute Min] 
+                        and OuterMinute[Minute] <= InnerMinute[Minute Max]
             ), 
         type table [
             Minute Min = Int64.Type, 
@@ -344,9 +345,8 @@ let
             Table.SelectRows (
                 FiveMinutePeriod, 
                 ( InnerMinute ) =>
-                    OuterMinute[Minute]
-                        >= InnerMinute[Minute Min] and OuterMinute[Minute]
-                        <= InnerMinute[Minute Max]
+                    OuterMinute[Minute] >= InnerMinute[Minute Min] 
+                        and OuterMinute[Minute] <= InnerMinute[Minute Max]
             ), 
         type table [
             Minute Min = Int64.Type, 
