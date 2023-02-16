@@ -1,126 +1,224 @@
 let
     MinutesInDay = 24 * 60,
     SecondsInDay = MinutesInDay * 60,
-    TimeList = 
-        Table.FromColumns ( 
+    TimeList = Table.FromColumns (
+        { List.Times ( #time ( 0, 0, 0 ), SecondsInDay, #duration ( 0, 0, 0, 1 ) ) },
+        type table [ Time = time ]
+    ),
+    PeriodOfDay = Table.FromColumns (
+        {
+            { 0, 5, 9, 13, 17, 21 },
+            { 4, 8, 12, 16, 20, 24 },
+            { "Midnight", "Early Morning", "Morning", "Afternoon", "Evening", "Night" },
+            { 1, 2, 3, 4, 5, 6 }
+        },
+        type table [
+            Hour Min = Int64.Type,
+            Hour Max = Int64.Type,
+            Period of Day Name = text,
+            Period of Day Name Sort = Int64.Type
+        ]
+    ),
+    TwelveHourPeriod = Table.FromColumns (
+        { { 0, 12 }, { 11, 23 }, { "Before Noon", "After Noon" }, { "0-11", "12-23" }, { 1, 2 } },
+        type table [
+            Hour Min = Int64.Type,
+            Hour Max = Int64.Type,
+            #"12 Hour Period Name" = text,
+            #"12 Hour Bin" = text,
+            #"12 Hour Bin Sort" = Int64.Type
+        ]
+    ),
+    SixHourPeriod = Table.FromColumns (
+        {
+            { 0, 6, 12, 19 },
+            { 5, 11, 18, 24 },
+            { "Down Time", "Login", "Meetings", "Logout" },
+            { "0-5", "6-11", "12-17", "18-23" },
+            { 1, 2, 3, 4 }
+        },
+        type table [
+            Hour Min = Int64.Type,
+            Hour Max = Int64.Type,
+            #"6 Hour Period Name" = text,
+            #"6 Hour Bin" = text,
+            #"6 Hour Bin Sort" = Int64.Type
+        ]
+    ),
+    FourHourPeriod = Table.FromColumns (
+        {
+            { 0, 4, 8, 12, 16, 20 },
+            { 3, 7, 11, 15, 19, 23 },
+            { "Down Time", "Down Time", "Login", "Meetings", "Logout", "Logout" },
+            { "0-3", "4-7", "8-11", "12-15", "16-19", "20-23" },
+            { 1, 2, 3, 4, 5, 6 }
+        },
+        type table [
+            Hour Min = Int64.Type,
+            Hour Max = Int64.Type,
+            #"4 Hour Period Name" = text,
+            #"4 Hour Bin" = text,
+            #"4 Hour Bin Sort" = Int64.Type
+        ]
+    ),
+    ThreeHourPeriod = Table.FromColumns (
+        {
+            { 0, 3, 6, 9, 12, 15, 18, 21 },
+            { 2, 5, 8, 11, 14, 17, 20, 23 },
             {
-                List.Times ( 
-                    #time ( 0, 0, 0 ), 
-                    SecondsInDay,
-                    #duration ( 0, 0, 0, 1 )
-                )
+                "Down Time",
+                "Refresh Time",
+                "Machinery Start",
+                "Login",
+                "Maintenance",
+                "Meetings",
+                "Logout",
+                "Cleaning"
             },
-            type table [Time = time]
-        ),
-    PeriodOfDay = 
-        Table.FromColumns ( 
+            { "0-3", "3-5", "6-8", "9-11", "12-14", "15-17", "18-20", "21-23" },
+            { 1, 2, 3, 4, 5, 6, 7, 8 }
+        },
+        type table [
+            Hour Min = Int64.Type,
+            Hour Max = Int64.Type,
+            #"3 Hour Period Name" = text,
+            #"3 Hour Bin" = text,
+            #"3 Hour Bin Sort" = Int64.Type
+        ]
+    ),
+    TwoHourPeriod = Table.FromColumns (
+        {
+            { 0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22 },
+            { 1, 3, 5, 7, 9, 11, 13, 15, 17, 19, 21, 23 },
             {
-                { 0, 5, 9, 13, 17, 21 },
-                { 4, 8, 12, 16, 20, 24 },
-                { "Midnight", "Early Morning", "Morning", "Afternoon", "Evening", "Night" },
-                { 1, 2, 3, 4, 5, 6 }
+                "Description",
+                "Description",
+                "Description",
+                "Description",
+                "Description",
+                "Description",
+                "Description",
+                "Description",
+                "Description",
+                "Description",
+                "Description",
+                "Description"
             },
-            type table [Hour Min = Int64.Type, Hour Max = Int64.Type, Period of Day Name = text, Period of Day Name Sort = Int64.Type]
-        ),
-    TwelveHourPeriod =  
-        Table.FromColumns ( 
             {
-                { 0, 12 },
-                { 11, 23 },
-                { "Before Noon", "After Noon" },
-                { "0-11", "12-23"},
-                { 1, 2 }
+                "0-1",
+                "2-3",
+                "4-5",
+                "6-7",
+                "8-9",
+                "10-11",
+                "12-13",
+                "14-15",
+                "16-17",
+                "18-19",
+                "20-21",
+                "22-23"
             },
-            type table [Hour Min = Int64.Type, Hour Max = Int64.Type, #"12 Hour Period Name" = text, #"12 Hour Bin" = text, #"12 Hour Bin Sort" = Int64.Type]
-        ),
-    SixHourPeriod =  
-        Table.FromColumns ( 
+            { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12 }
+        },
+        type table [
+            Hour Min = Int64.Type,
+            Hour Max = Int64.Type,
+            #"2 Hour Period Name" = text,
+            #"2 Hour Bin" = text,
+            #"2 Hour Bin Sort" = Int64.Type
+        ]
+    ),
+    ThirtyMinutePeriod = Table.FromColumns (
+        { { 0, 30 }, { 29, 59 }, { "Description", "Description" }, { "0-29", "30-59" }, { 1, 2 } },
+        type table [
+            Minute Min = Int64.Type,
+            Minute Max = Int64.Type,
+            #"30 Minute Period Name" = text,
+            #"30 Minute Bin" = text,
+            #"30 Minute Bin Sort" = Int64.Type
+        ]
+    ),
+    FifteenMinutePeriod = Table.FromColumns (
+        {
+            { 0, 15, 30, 45 },
+            { 14, 29, 44, 59 },
+            { "Description", "Description", "Description", "Description" },
+            { "0-29", "30-59" },
+            { 1, 2, 3, 4 }
+        },
+        type table [
+            Minute Min = Int64.Type,
+            Minute Max = Int64.Type,
+            #"15 Minute Period Name" = text,
+            #"15 Minute Bin" = text,
+            #"15 Minute Bin Sort" = Int64.Type
+        ]
+    ),
+    TenMinutePeriod = Table.FromColumns (
+        {
+            { 0, 10, 20, 30, 40, 50 },
+            { 9, 19, 29, 39, 49, 59 },
             {
-                { 0, 6, 12, 19 },
-                { 5, 11, 18, 24 },
-                { "Down Time", "Login", "Meetings", "Logout" },
-                { "0-5", "6-11", "12-17", "18-23" },
-                { 1, 2, 3, 4 }
+                "Description",
+                "Description",
+                "Description",
+                "Description",
+                "Description",
+                "Description"
             },
-            type table [Hour Min = Int64.Type, Hour Max = Int64.Type, #"6 Hour Period Name" = text, #"6 Hour Bin" = text, #"6 Hour Bin Sort" = Int64.Type]
-        ),
-    FourHourPeriod = 
-        Table.FromColumns ( 
+            { "0-9", "10-19", "20-29", "30-39", "40-49", "50-59" },
+            { 1, 2, 3, 4, 5, 6 }
+        },
+        type table [
+            Minute Min = Int64.Type,
+            Minute Max = Int64.Type,
+            #"10 Minute Period Name" = text,
+            #"10 Minute Bin" = text,
+            #"10 Minute Bin Sort" = Int64.Type
+        ]
+    ),
+    FiveMinutePeriod = Table.FromColumns (
+        {
+            { 0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55 },
+            { 4, 9, 14, 19, 24, 29, 34, 39, 44, 49, 54, 59 },
             {
-                { 0, 4, 8, 12, 16, 20},
-                { 3, 7, 11, 15, 19, 23 },
-                { "Down Time", "Down Time", "Login",  "Meetings", "Logout", "Logout" },
-                { "0-3", "4-7", "8-11", "12-15", "16-19", "20-23" },
-                { 1, 2, 3, 4, 5, 6 }
+                "Description",
+                "Description",
+                "Description",
+                "Description",
+                "Description",
+                "Description",
+                "Description",
+                "Description",
+                "Description",
+                "Description",
+                "Description",
+                "Description"
             },
-            type table [Hour Min = Int64.Type, Hour Max = Int64.Type, #"4 Hour Period Name" = text, #"4 Hour Bin" = text, #"4 Hour Bin Sort" = Int64.Type]
-        ),
-    ThreeHourPeriod = 
-        Table.FromColumns ( 
             {
-                { 0, 3, 6, 9, 12, 15, 18, 21 },
-                { 2, 5, 8, 11, 14, 17, 20, 23 },
-                { "Down Time", "Refresh Time", "Machinery Start", "Login", "Maintenance", "Meetings", "Logout", "Cleaning" },
-                { "0-3", "3-5", "6-8", "9-11", "12-14", "15-17", "18-20", "21-23" },
-                { 1, 2, 3, 4, 5, 6, 7, 8 }
+                "0-4",
+                "5-9",
+                "10-14",
+                "15-19",
+                "20-24",
+                "25-29",
+                "30-34",
+                "35-39",
+                "40-44",
+                "45-49",
+                "50-54",
+                "55-59"
             },
-            type table [Hour Min = Int64.Type, Hour Max = Int64.Type, #"3 Hour Period Name" = text, #"3 Hour Bin" = text, #"3 Hour Bin Sort" = Int64.Type]
-        ),
-    TwoHourPeriod = 
-        Table.FromColumns ( 
-            {
-                { 0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22 },
-                { 1, 3, 5, 7, 9, 11, 13, 15, 17, 19, 21, 23 },
-                { "Description", "Description", "Description", "Description", "Description", "Description", "Description", "Description", "Description", "Description", "Description", "Description" },
-                { "0-1", "2-3", "4-5", "6-7", "8-9", "10-11", "12-13", "14-15", "16-17", "18-19", "20-21", "22-23" },
-                { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12 }
-            },
-            type table [Hour Min = Int64.Type, Hour Max = Int64.Type, #"2 Hour Period Name" = text, #"2 Hour Bin" = text, #"2 Hour Bin Sort" = Int64.Type]
-        ),
-    ThirtyMinutePeriod = 
-        Table.FromColumns ( 
-            {
-                { 0, 30 },
-                { 29, 59 },
-                { "Description", "Description" },
-                { "0-29", "30-59" },
-                { 1, 2 }
-            },
-            type table [Minute Min = Int64.Type, Minute Max = Int64.Type, #"30 Minute Period Name" = text, #"30 Minute Bin" = text, #"30 Minute Bin Sort" = Int64.Type]
-        ),
-    FifteenMinutePeriod = 
-        Table.FromColumns ( 
-            {
-                { 0, 15, 30, 45 },
-                { 14, 29, 44, 59 },
-                { "Description", "Description", "Description", "Description" },
-                { "0-29", "30-59" },
-                { 1, 2, 3, 4 }
-            },
-            type table [Minute Min = Int64.Type, Minute Max = Int64.Type, #"15 Minute Period Name" = text, #"15 Minute Bin" = text, #"15 Minute Bin Sort" = Int64.Type]
-        ),
-    TenMinutePeriod = 
-        Table.FromColumns ( 
-            {
-                { 0, 10, 20, 30, 40, 50 },
-                { 9, 19, 29, 39, 49, 59 },
-                { "Description", "Description", "Description", "Description", "Description", "Description" },
-                { "0-9", "10-19", "20-29", "30-39", "40-49", "50-59" },
-                { 1, 2, 3, 4, 5, 6 }
-            },
-            type table [Minute Min = Int64.Type, Minute Max = Int64.Type, #"10 Minute Period Name" = text, #"10 Minute Bin" = text, #"10 Minute Bin Sort" = Int64.Type]
-        ),
-    FiveMinutePeriod = 
-        Table.FromColumns ( 
-            {
-                { 0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55 },
-                { 4, 9, 14, 19, 24, 29, 34, 39, 44, 49, 54, 59 },
-                { "Description", "Description", "Description", "Description", "Description", "Description", "Description", "Description", "Description", "Description", "Description", "Description" },
-                { "0-4", "5-9", "10-14", "15-19", "20-24", "25-29", "30-34", "35-39", "40-44", "45-49", "50-54", "55-59" },
-                { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12 }
-            },
-            type table [Minute Min = Int64.Type, Minute Max = Int64.Type, #"5 Minute Period Name" = text, #"5 Minute Bin" = text, #"5 Minute Bin Sort" = Int64.Type]
-        ),
+            { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12 }
+        },
+        type table [
+            Minute Min = Int64.Type,
+            Minute Max = Int64.Type,
+            #"5 Minute Period Name" = text,
+            #"5 Minute Bin" = text,
+            #"5 Minute Bin Sort" = Int64.Type
+        ]
+    ),
     NewCols = 
         Table.AddColumn ( 
             TimeList,
