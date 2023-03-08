@@ -18,9 +18,9 @@
     optional pWeeklyType as text
 ) =>
 let
-    FirstFiscalMonth            = if pFirstFiscalMonth is null then 8 else pFirstFiscalMonth,
+    FirstFiscalMonth            = if pFirstFiscalMonth is null then 1 else pFirstFiscalMonth,
     FirstDayOfWeek              = if pFirstDayOfWeek is null then Day.Monday else pFirstDayOfWeek,
-    FirstDate                   = if pFirstDate is null then #date ( 2018, 03, 18 ) else pFirstDate,
+    FirstDate                   = if pFirstDate is null then #date ( 2023, 01, 01 ) else pFirstDate,
     LastDate                    = if pLastDate is null then #date ( 2025, 08, 15 ) else pLastDate,
     TypeStartFiscalYear         = if pTypeStartFiscalYear is null then 1 else pTypeStartFiscalYear,
     QuarterWeekType             = if pQuarterWeekType is null then "445" else pQuarterWeekType, //445, 454, 544
@@ -73,18 +73,20 @@ let
                             }
                         in
                             Result,
-
-                    NearestCalculations = 
+                   NearestCalculations = 
                         let
-                            FirstDayFiscalYear = #date ( FWYearNumber -1, FirstFiscalMonth, 1 ),
-                            LastDayFiscaYear = Date.EndOfMonth ( #date ( FWYearNumber, FirstFiscalMonth - 1, 1 ) ),
+                            StartFiscalYearNumber = FWYearNumber - ( OffsetFiscalYear * TypeStartFiscalYear ),
+                            FirstDayCurrentYear = #date ( StartFiscalYearNumber, FirstFiscalMonth, 1 ),
+                            FirstDayNextYear =  #date ( StartFiscalYearNumber + 1, FirstFiscalMonth, 1 ),
+                            LastDayFiscalYear = 
+                                Date.AddDays ( FirstDayNextYear, -1 ),
                             StartOfYear = 
                                 let
-                                    FirstDayWeekNumber =  Date.DayOfWeek ( FirstDayFiscalYear, FirstDayOfWeek ),
-                                    PreviousWeekStart = Date.StartOfWeek ( FirstDayFiscalYear, FirstDayOfWeek ),
+                                    FirstDayWeekNumber =  Date.DayOfWeek ( FirstDayCurrentYear, FirstDayOfWeek ),
+                                    PreviousWeekStart = Date.StartOfWeek ( FirstDayCurrentYear, FirstDayOfWeek ),
                                     NextWeekStart =  Date.AddDays ( PreviousWeekStart, 7 ),
-                                    DayGapFromPrevious = Number.From ( FirstDayFiscalYear ) - Number.From ( PreviousWeekStart ), 
-                                    DayGapFromNext = Number.From ( NextWeekStart ) - Number.From ( FirstDayFiscalYear ),
+                                    DayGapFromPrevious = Number.From ( FirstDayCurrentYear ) - Number.From ( PreviousWeekStart ), 
+                                    DayGapFromNext = Number.From ( NextWeekStart ) - Number.From ( FirstDayCurrentYear ),
                                     Result =
                                         Table.Sort ( 
                                             Table.FromRows ( 
@@ -100,11 +102,11 @@ let
                                     Result[Date]{0},
                             EndOfYear = 
                                 let
-                                    LastDayWeekNumber =  Date.DayOfWeek ( LastDayFiscaYear, FirstDayOfWeek ),
-                                    LastSaturdayCurrentMonth =  Date.AddDays ( Date.StartOfWeek ( LastDayFiscaYear, FirstDayOfWeek ), -1 ),
+                                    LastDayWeekNumber =  Date.DayOfWeek ( LastDayFiscalYear, FirstDayOfWeek ),
+                                    LastSaturdayCurrentMonth =  Date.AddDays ( Date.StartOfWeek ( LastDayFiscalYear, FirstDayOfWeek ), -1 ),
                                     FirstSaturdayNextMonth =  Date.AddDays ( LastSaturdayCurrentMonth, 7 ),
-                                    DayGapFromLastSaturday = Number.From ( LastDayFiscaYear ) - Number.From ( LastSaturdayCurrentMonth ), 
-                                    DayGapFromNextSaturday = Number.From ( FirstSaturdayNextMonth ) - Number.From ( LastDayFiscaYear ),
+                                    DayGapFromLastSaturday = Number.From ( LastDayFiscalYear ) - Number.From ( LastSaturdayCurrentMonth ), 
+                                    DayGapFromNextSaturday = Number.From ( FirstSaturdayNextMonth ) - Number.From ( LastDayFiscalYear ),
                                     Result =
                                         Table.Sort ( 
                                             Table.FromRows ( 
@@ -118,7 +120,7 @@ let
                                         )
                                 in
                                     Result[Date]{0},
-                            Result = 
+                             Result = 
                                 { 
                                     FWYearNumber,
                                     StartOfYear, 
